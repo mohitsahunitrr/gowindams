@@ -13,7 +13,7 @@ type ProcessQueueEntry struct {
 }
 
 const ProcessTypeCIRScale = "CIR_Scale"
-const ProcessTypeZoomifyImage = "Zoomify_Image"
+const ProcessTypeZoomifyImage = "Zoomify_Img"
 
 type ProcessQueueServiceClient struct {
 	env *Environment
