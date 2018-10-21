@@ -48,7 +48,7 @@ func (provider accessTokenProvider) obtainAccessToken(resource string) (string, 
 
 	// Query for a new token
 	resp, err := provider.queryAccessToken(resource)
-	if err == nil {
+	if err != nil {
 		return "", err
 	} else {
 		// Cache the token
