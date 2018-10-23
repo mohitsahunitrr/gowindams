@@ -6,12 +6,12 @@ import (
 )
 
 type EnvironmentConfig struct {
-	Name string
-	ServiceURI string
-	ClientId string
-	ClientSecret string
-	TenantId string
-	ServiceAppId string
+	Name string            `json:"name" yaml:"name"`
+	ServiceURI string      `json:"serviceURI" yaml:"serviceURI"`
+	ClientId string        `json:"clientId" yaml:"clientId"`
+	ClientSecret string    `json:"clientSecret" yaml:"clientSecret"`
+	TenantId string        `json:"tenantId" yaml:"tenantId"`
+	ServiceAppId string    `json:"serviceAppId" yaml:"serviceAppId"`
 }
 
 type EnvironmentConfigs []EnvironmentConfig
