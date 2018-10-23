@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"sync"
@@ -74,8 +75,10 @@ func (provider accessTokenProvider) queryAccessToken(resource string) (*AccessTo
 		data, _ := ioutil.ReadAll(resp.Body)
 		err = json.Unmarshal(data, &atresp)
 		if err != nil {
+			log.Printf("GOWINDAMS: Error obtaining access token for resource %s: %s\n", resource, err)
 			return nil, err
 		} else {
+			log.Printf("GOWINDAMS: Successfully obtained access token for resource %s\n", resource)
 			return atresp, nil
 		}
 	}

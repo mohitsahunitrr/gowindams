@@ -4,8 +4,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"io/ioutil"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -58,29 +59,43 @@ func executeRestCall(env *Environment, action string, url string, data []byte, r
 
 	req, err := http.NewRequest(action, url, bytes.NewBuffer(data))
 	if err != nil {
+		log.Printf("GOWINDAMS: Error building http request for %s against %s: %s\n", action, url, err)
 		return err
 	}
 	token, err := env.obtainAccessToken()
 	if err != nil {
 		return err
 	}
+
+	log.Printf("GOWINDAMS: Executing %s against endpoint %s", action, url)
+
 	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 	req.Header.Add("accept", "application/json")
 	req.Header.Add("content-type", "application/json")
 	resp, err := client.Do(req)
 	defer resp.Body.Close()
+
+	log.Printf("GOWINDAMS: Response with status code %d for %s against endpoint %s", resp.StatusCode, action, url)
+
 	if err != nil {
+		log.Printf("GOWINDAMS: Got error for %s against %s: %s\n", action, url, err)
 		return err
 	}
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
+		log.Printf("GOWINDAMS: Got error getting response body for %s against %s: %s\n", action, url, err)
 		return err
-	}	
+	}
 	if resp.StatusCode != 200 {
-		return errors.New(string(body))
+		s := string(body)
+		log.Printf("GOWINDAMS: Got status code %d for %s against %s: %s\n", resp.StatusCode, action, url, s)
+		return errors.New(s)
 	}
 	if results != nil {
-		err = json.Unmarshal(body, &results)
+		err = json.Unmarshal(body, results)
+		if err == nil {
+			log.Printf("GOWINDAMS: Got response for %s against endpoint %s: %+v\n", results)
+		}
 	}
 	return err
 }

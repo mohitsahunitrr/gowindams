@@ -34,7 +34,7 @@ func (client ProcessQueueServiceClient) Claim(processorId string, processType st
 	v.Add(paramProcessType, processType)
 	url := fmt.Sprintf(pqClaimURI, client.env.ServiceURI, v.Encode())
 	results := make([]ProcessQueueEntry, 0)
-	err := executeRestCall(client.env, "GET", url, nil, results)
+	err := executeRestCall(client.env, "GET", url, nil, &results)
 	return results, err
 }
 
