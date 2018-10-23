@@ -22,6 +22,15 @@ type AccessTokenResponse struct {
 	Resource string `json:"resource`
 }
 
+type AccessTokenErrorResponse struct {
+	Error string `json:"error"`
+	ErrorDescription string `json:"error_description"`
+	ErrorCodes []int `json:"error_codes"`
+	Timestamp string `json:"timestamp"`
+	TraceId string `json:"trace_id"`
+	CorrelationId string `json:"correlation_id"`
+}
+
 type accessTokenProvider struct {
 	clientId string
 	tenantId string
@@ -60,7 +69,7 @@ func (provider accessTokenProvider) obtainAccessToken(resource string) (string, 
 
 func (provider accessTokenProvider) queryAccessToken(resource string) (*AccessTokenResponse, error) {
 	params := make(url.Values)
-	params["grant_type"] = []string{"grant_type"}
+	params["grant_type"] = []string{"client_credentials"}
 	params["client_id"] = []string{provider.clientId}
 	params["client_secret"] = []string{provider.clientSecret}
 	params["resource"] = []string{resource}
@@ -73,13 +82,20 @@ func (provider accessTokenProvider) queryAccessToken(resource string) (*AccessTo
 	} else {
 		atresp := new(AccessTokenResponse)
 		data, _ := ioutil.ReadAll(resp.Body)
-		err = json.Unmarshal(data, &atresp)
-		if err != nil {
-			log.Printf("GOWINDAMS: Error obtaining access token for resource %s: %s\n", resource, err)
-			return nil, err
+		if resp.StatusCode != 200 {
+			eresp := new(AccessTokenErrorResponse)
+			json.Unmarshal(data, &eresp)
+			log.Printf("GOWINDAMS: Error from token request:\t%s", eresp.ErrorDescription)
+			return nil, fmt.Errorf("%s", eresp.Error)
 		} else {
-			log.Printf("GOWINDAMS: Successfully obtained access token for resource %s\n", resource)
-			return atresp, nil
+			err = json.Unmarshal(data, &atresp)
+			if err != nil {
+				log.Printf("GOWINDAMS: Error obtaining access token for resource %s: %s\n", resource, err)
+				return nil, err
+			} else {
+//				log.Printf("GOWINDAMS: Successfully obtained access token for resource %s: %+v\n", resource, atresp)
+				return atresp, nil
+			}
 		}
 	}
 }

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 )
 
@@ -102,6 +103,7 @@ const resourceSearchURI = resourceRootURI + "/search"
 const resourceUpDownloadURI = "%s/multimedia/%s"
 
 func (client ResourceServiceClient) Get(resourceId string) (*ResourceMetadata, error) {
+	log.Printf("Loading resource metadata for %s", resourceId)
 	url := fmt.Sprintf(resourceGetURI, client.env.ServiceURI, resourceId)
 	result := new(ResourceMetadata)
 	err := executeRestCall(client.env, "GET", url, nil, result)

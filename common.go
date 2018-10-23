@@ -94,7 +94,7 @@ func executeRestCall(env *Environment, action string, url string, data []byte, r
 	if results != nil {
 		err = json.Unmarshal(body, results)
 		if err == nil {
-			log.Printf("GOWINDAMS: Got response for %s against endpoint %s: %+v\n", results)
+			log.Printf("GOWINDAMS: Got response for %s against endpoint %s: %+v\n", action, url, results)
 		}
 	}
 	return err
