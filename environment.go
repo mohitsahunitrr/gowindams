@@ -3,6 +3,7 @@ package gowindams
 import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	"log"
 )
 
 type EnvironmentConfig struct {
@@ -56,7 +57,9 @@ func LoadEnvironments(configFilePath string) (*Environments, error) {
 	if err != nil {
 		return nil, err
 	}
-	environments := make(Environments, len(*configs))
+	count := len(*configs)
+	log.Printf("Loaded configurations for %d environments", count)
+	environments := make(Environments, count)
 	i := 0
 	for _, cfg := range *configs {
 		env := Environment{
@@ -72,6 +75,7 @@ func LoadEnvironments(configFilePath string) (*Environments, error) {
 			env: &env,
 		}
 		environments[i] = env
+		log.Printf("Configured environment %d: %s\t%s", i, env.Name, env.ServiceURI)
 		i++
 	}
 	return &environments, nil

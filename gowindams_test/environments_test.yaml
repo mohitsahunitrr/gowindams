@@ -1,0 +1,37 @@
+# ### InspecTools ###
+#
+- name: InspecTools Dev
+  tenantId: InspecTools-Dev-Tenant-Id
+  clientId: InspecTools-Dev-Processor-Client-Id
+  clientSecret: InspecTools-Dev-Processor-Client-Secret
+  serviceAppId: InspecTools-Dev-Services-App-Id
+  serviceURI: https://servicesdev.inspectools.net/
+#- name: InspecTools Test
+#  tenantId: InspecTools-Test-Tenant-Id
+#  clientId: InspecTools-Test-Processor-Client-Id
+#  clientSecret: InspecTools-Test-Processor-Client-Secret
+#  serviceAppId: InspecTools-Test-Services-App-Id
+#  serviceURI: https://servicestest.inspectools.net/
+#- name: InspecTools Prod
+#  tenantId: InspecTools-Prod-Tenant-Id
+#  clientId: InspecTools-Prod-Processor-Client-Id
+#  clientSecret: InspecTools-Prod-Processor-Client-Secret
+#  serviceAppId: InspecTools-Prod-Services-App-Id
+#  serviceURI: https://servicesprod.inspectools.net/v2.8/
+#
+# ### Vestas ###
+#
+# Authenticates against InspecTools ADD but processes Vestas.
+#
+#- name: Vestas Dev
+#  tenantId: Vestas-Dev-Tenant-Id
+#  clientId: Vestas-Dev-Processor-Client-Id
+#  clientSecret: Vestas-Dev-Processor-Client-Secret
+#  serviceAppId: Vestas-Dev-Services-App-Id
+#  serviceURI: https://servicesdev.vestas.inspectools.net/
+#- name: Vestas Test
+#  tenantId: Vestas-Test-Tenant-Id
+#  clientId: Vestas-Test-Processor-Client-Id
+#  clientSecret: Vestas-Test-Processor-Client-Secret
+#  serviceAppId: Vestas-Test-Services-App-Id
+#  serviceURI: https://servicestest.vestas.inspectools.net/

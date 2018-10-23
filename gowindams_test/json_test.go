@@ -1,9 +1,10 @@
-package gowindams
+package gowindams_test
 
 import (
 	"encoding/json"
 	"testing"
 	"time"
+	"github.com/Inspectools/gowindams"
 )
 
 const Example_RMeta =
@@ -30,7 +31,7 @@ const Example_RMeta =
 const Example_Timestamp = "20151216T224819.000+0000"
 
 func TestDateParse(testing *testing.T) {
-	t, err := time.Parse(DATE_TIME_FORMAT, Example_Timestamp)
+	t, err := time.Parse(gowindams.DATE_TIME_FORMAT, Example_Timestamp)
 	if err != nil {
 	    testing.Fatal("error:", err)
 	}
@@ -58,7 +59,7 @@ func TestDateParse(testing *testing.T) {
 }
 
 func TestUnMarshalResourceMetadata(testing *testing.T) {
-	rmeta := new(ResourceMetadata)
+	rmeta := new(gowindams.ResourceMetadata)
 	err := json.Unmarshal([]byte(Example_RMeta), &rmeta)
 	if err != nil {
 	    testing.Fatal("error:", err)
