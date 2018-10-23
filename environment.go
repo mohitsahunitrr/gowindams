@@ -57,22 +57,22 @@ func LoadEnvironments(configFilePath string) (*Environments, error) {
 		return nil, err
 	}
 	environments := make(Environments, len(*configs))
+	i := 0
 	for _, cfg := range *configs {
-		if cfg.ClientId != "" && cfg.ClientSecret != "" && cfg.Name != "" && cfg.ServiceAppId != "" && cfg.ServiceURI != "" && cfg.TenantId != "" {
-			env := Environment{
-				Name:                cfg.Name,
-				ServiceAppId:        cfg.ServiceAppId,
-				ServiceURI:          cfg.ServiceURI,
-				accessTokenProvider: NewProvider(&cfg),
-			}
-			env.processQueueServiceClient = &ProcessQueueServiceClient{
-				env: &env,
-			}
-			env.resourceServiceClient = &ResourceServiceClient{
-				env: &env,
-			}
-			environments = append(environments, env)
+		env := Environment{
+			Name:                cfg.Name,
+			ServiceAppId:        cfg.ServiceAppId,
+			ServiceURI:          cfg.ServiceURI,
+			accessTokenProvider: NewProvider(&cfg),
 		}
+		env.processQueueServiceClient = &ProcessQueueServiceClient{
+			env: &env,
+		}
+		env.resourceServiceClient = &ResourceServiceClient{
+			env: &env,
+		}
+		environments[i] = env
+		i++
 	}
 	return &environments, nil
 }
