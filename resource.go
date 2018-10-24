@@ -148,7 +148,11 @@ func (client ResourceServiceClient) Download(resourceId string) (*io.ReadCloser,
 	if err != nil {
 		return nil, err
 	} else {
-		return &resp.Body, err
+		if resp.StatusCode != http.StatusOK {
+			return nil, fmt.Errorf("Got response code %d downloading the image \"%s\" from \"%s\"", resp.StatusCode, resourceId, url)
+		} else {
+			return &resp.Body, err
+		}
 	}
 }
 
