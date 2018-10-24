@@ -50,7 +50,7 @@ func (client ProcessQueueServiceClient) Enqueue(entries []ProcessQueueEntry) err
 	return err
 }
 
-func (client ProcessQueueServiceClient) MarkErrored(entryId int, error string) error {
+func (client ProcessQueueServiceClient) MarkErrored(entryId int64, error string) error {
 	v := url.Values{}
 	v.Add(paramError, error)
 	url := fmt.Sprintf(pqErroredURI, client.env.ServiceURI, entryId, v.Encode())
