@@ -26,7 +26,7 @@ const paramProcessType = "processType"
 const pqRootURI = "%s/processQueue"
 const pqClaimURI = pqRootURI + "/claim?%s"
 const pqEnqueueURI = pqRootURI + "/enqueue"
-const pqErroredURI = pqRootURI + "/%s/errored/%s"
+const pqErroredURI = pqRootURI + "/%d/errored/%s"
 const pqProcessedURI = pqRootURI + "/processed"
 
 
@@ -50,7 +50,7 @@ func (client ProcessQueueServiceClient) Enqueue(entries []ProcessQueueEntry) err
 	return err
 }
 
-func (client ProcessQueueServiceClient) MarkErrored(entryId string, error string) error {
+func (client ProcessQueueServiceClient) MarkErrored(entryId int, error string) error {
 	v := url.Values{}
 	v.Add(paramError, error)
 	url := fmt.Sprintf(pqErroredURI, client.env.ServiceURI, entryId, v.Encode())
