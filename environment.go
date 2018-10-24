@@ -4,6 +4,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
+	"strings"
 )
 
 type EnvironmentConfig struct {
@@ -65,7 +66,7 @@ func LoadEnvironments(configFilePath string) (*Environments, error) {
 		env := Environment{
 			Name:                cfg.Name,
 			ServiceAppId:        cfg.ServiceAppId,
-			ServiceURI:          cfg.ServiceURI,
+			ServiceURI:          strings.TrimRight(cfg.ServiceURI, "/"),
 			accessTokenProvider: NewProvider(&cfg),
 		}
 		env.processQueueServiceClient = &ProcessQueueServiceClient{

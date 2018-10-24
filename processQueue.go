@@ -26,7 +26,7 @@ const paramProcessType = "processType"
 const pqRootURI = "%s/processQueue"
 const pqClaimURI = pqRootURI + "/claim?%s"
 const pqEnqueueURI = pqRootURI + "/enqueue"
-const pqErroredURI = pqRootURI + "/%d/errored/%s"
+const pqErroredURI = pqRootURI + "/%d/errored?%s"
 const pqProcessedURI = pqRootURI + "/processed"
 
 
