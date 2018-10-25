@@ -64,7 +64,7 @@ type ResourceMetadata struct {
 	ProcessedBy           *string         `json:"processedBy"`
 	Readings              []SensorReading `json:"readings"`
 	SiteId                *string         `json:"siteId"`
-	Size                  *Dimension      `json:"dimension"`
+	Size                  *Dimension      `json:"size"`
 	Status                *string         `json:"status"`
 	SubmissionId          *string         `json:"submissionId"`
 	DownloadURL           *string         `json:"downloadURL"`
