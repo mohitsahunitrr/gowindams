@@ -87,9 +87,13 @@ func executeRestCall(env *Environment, action string, url string, data []byte, r
 		return err
 	}
 	if resp.StatusCode != 200 {
-		s := string(body)
-		log.Printf("GOWINDAMS: Got status code %d for %s against %s: %s\n", resp.StatusCode, action, url, s)
-		return errors.New(s)
+		if resp.StatusCode == 204 && results == nil {
+			// This is fine.  Processed ok, no content, but we don't expect any.
+		} else {
+			s := string(body)
+			log.Printf("GOWINDAMS: Got status code %d for %s against %s: %s\n", resp.StatusCode, action, url, s)
+			return errors.New(s)
+		}
 	}
 	if results != nil {
 		err = json.Unmarshal(body, results)
