@@ -1,3 +1,4 @@
 go.sum
 .idea
 examples/resource_example
+examples/resource_downloads

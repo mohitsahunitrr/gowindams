@@ -138,7 +138,7 @@ func (client ResourceServiceClient) Search(criteria *ResourceSearchCriteria) ([]
 	}
 	results := make([]ResourceMetadata, 0)
 	url := fmt.Sprintf(resourceSearchURI, client.env.ServiceURI)
-	err = executeRestCall(client.env, "POST", url, data, results)
+	err = executeRestCall(client.env, "POST", url, data, &results)
 	return results, err
 }
 

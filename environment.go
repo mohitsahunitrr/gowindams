@@ -23,6 +23,7 @@ type Environment struct {
 	ServiceAppId string
 	ServiceURI string
 	accessTokenProvider *accessTokenProvider
+	inspectionEventResourceServiceClient *InspectionEventResourceServiceClient
 	resourceServiceClient *ResourceServiceClient
 	processQueueServiceClient *ProcessQueueServiceClient
 }
@@ -31,6 +32,9 @@ func (env Environment) obtainAccessToken() (string, error) {
 	return env.accessTokenProvider.obtainAccessToken(env.ServiceAppId)
 }
 
+func (env Environment) InspectionEventResourceServiceClient() *InspectionEventResourceServiceClient {
+	return env.inspectionEventResourceServiceClient
+}
 func (env Environment) ResourceServiceClient() *ResourceServiceClient {
 	return env.resourceServiceClient
 }
@@ -68,6 +72,9 @@ func LoadEnvironments(configFilePath string) (*Environments, error) {
 			ServiceAppId:        cfg.ServiceAppId,
 			ServiceURI:          strings.TrimRight(cfg.ServiceURI, "/"),
 			accessTokenProvider: NewProvider(&cfg),
+		}
+		env.inspectionEventResourceServiceClient = &InspectionEventResourceServiceClient{
+			env: &env,
 		}
 		env.processQueueServiceClient = &ProcessQueueServiceClient{
 			env: &env,

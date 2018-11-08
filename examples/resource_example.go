@@ -19,7 +19,7 @@ func main() {
 	dfltConfigFile := fmt.Sprintf("%s/.windams/environments.yaml", user.HomeDir)
 
 	environmentsConfigFile := flag.String("c", dfltConfigFile, "Environments config file, defaults to ~/.windams/environments.yaml")
-	environmentName := flag.String("e", "Local Dev", "Environment to connect to")
+	environmentName := flag.String("env", "Local Dev", "Environment to connect to")
 	resourceId := flag.String("r", "", "Unique ID of the resource")
 	outputFile := flag.String("o", "", "Path to write the resource to")
 	flag.Parse()
