@@ -76,7 +76,7 @@ func main() {
 	var input *io.ReadCloser
 	var target *os.File
 	for _, rmeta := range resources {
-		ext = extension(*rmeta.ContentType)
+		ext = extension(rmeta.ContentType)
 		if ext != "" {
 			ierparams.ResourceId = rmeta.ResourceId
 		}
@@ -89,32 +89,39 @@ func main() {
 		} else {
 			filepath = fmt.Sprintf(filePathTempl, damagedDir, *rmeta.ResourceId, ext)
 		}
-		target, err = os.Create(filepath)
-		if err != nil {
-			log.Fatalf("Unable to create the file \"%s\" to copy to: %s", filepath, err)
+		if _, err = os.Stat(filepath); os.IsNotExist(err) {
+			target, err = os.Create(filepath)
+			if err != nil {
+				log.Fatalf("Unable to create the file \"%s\" to copy to: %s", filepath, err)
+			}
+			input, err = env.ResourceServiceClient().Download(*rmeta.ResourceId)
+			if err != nil {
+				log.Fatal("Unable to download resource \"%s\": %s", *rmeta.ResourceId, err)
+			}
+			_, err = io.Copy(target, *input)
+			if err != nil {
+				log.Fatal("Unable to write contents of resource \"%s\": %s", *rmeta.ResourceId, err)
+			}
+			target.Close()
+			(*input).Close()
+			log.Printf("The resource \"%s\" has been downloaded.", *rmeta.ResourceId)
+		} else {
+			log.Printf("The resource \"%s\" has already been downloaded.", *rmeta.ResourceId)
 		}
-		input, err = env.ResourceServiceClient().Download(*rmeta.ResourceId)
-		if err != nil {
-			log.Fatal("Unable to download resource \"%s\": %s", *rmeta.ResourceId, err)
-		}
-		_, err = io.Copy(target, *input)
-		if err != nil {
-			log.Fatal("Unable to write contents of resource \"%s\": %s", *rmeta.ResourceId, err)
-		}
-		target.Close()
-		(*input).Close()
 	}
 }
 
-func extension(contentType string) string {
-	if "image/gif" == contentType {
-		return ".gif"
-	}
-	if "image/jpeg" == contentType {
-		return ".jpg"
-	}
-	if "image/png" == contentType {
-		return ".png"
+func extension(contentType *string) string {
+	if contentType != nil {
+		if "image/gif" == *contentType {
+			return ".gif"
+		}
+		if "image/jpeg" == *contentType {
+			return ".jpg"
+		}
+		if "image/png" == *contentType {
+			return ".png"
+		}
 	}
 	return ""
 }
