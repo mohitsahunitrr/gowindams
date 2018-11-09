@@ -92,15 +92,18 @@ func main() {
 		if _, err = os.Stat(filepath); os.IsNotExist(err) {
 			target, err = os.Create(filepath)
 			if err != nil {
-				log.Fatalf("Unable to create the file \"%s\" to copy to: %s", filepath, err)
+				log.Printf("Unable to create the file \"%s\" to copy to: %s", filepath, err)
+				continue
 			}
 			input, err = env.ResourceServiceClient().Download(*rmeta.ResourceId)
 			if err != nil {
-				log.Fatal("Unable to download resource \"%s\": %s", *rmeta.ResourceId, err)
+				log.Printf("Unable to download resource \"%s\": %s", *rmeta.ResourceId, err)
+				continue
 			}
 			_, err = io.Copy(target, *input)
 			if err != nil {
-				log.Fatal("Unable to write contents of resource \"%s\": %s", *rmeta.ResourceId, err)
+				log.Printf("Unable to write contents of resource \"%s\": %s", *rmeta.ResourceId, err)
+				continue
 			}
 			target.Close()
 			(*input).Close()
