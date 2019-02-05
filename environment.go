@@ -47,6 +47,15 @@ type Environments []Environment
 
 const DEFAULT_CONFIG_PATH = "/etc/windams/environments.yaml"
 
+func (envs *Environments) Find(name string) *Environment {
+	for _, env := range *envs {
+		if env.Name == name {
+			return &env
+		}
+	}
+	return nil
+}
+
 func LoadEnvironments(configFilePath string) (*Environments, error) {
 	if "" == configFilePath {
 		configFilePath = DEFAULT_CONFIG_PATH
