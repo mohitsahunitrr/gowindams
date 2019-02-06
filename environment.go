@@ -35,8 +35,13 @@ func (env Environment) obtainAccessToken() (string, error) {
 }
 
 func (env Environment) ObtainSigningKeys() (map[string][]byte, error) {
-	keys, err := env.accessTokenProvider.obtainSigningKeys()
-	return keys, err
+	if env.accessTokenProvider == nil {
+		keys := make(map[string][]byte)
+		return keys, nil
+	} else {
+		keys, err := env.accessTokenProvider.obtainSigningKeys()
+		return keys, err
+	}
 }
 
 func (env Environment) InspectionEventResourceServiceClient() *InspectionEventResourceServiceClient {
