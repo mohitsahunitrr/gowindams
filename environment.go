@@ -21,8 +21,10 @@ type EnvironmentConfigs []EnvironmentConfig
 
 type Environment struct {
 	Name string
+	ClientId string
 	ServiceAppId string
 	ServiceURI string
+	TenantId string
 	accessTokenProvider accessTokenProvider
 	inspectionEventResourceServiceClient *InspectionEventResourceServiceClient
 	resourceServiceClient *ResourceServiceClient
@@ -90,8 +92,10 @@ func LoadEnvironments(configFilePath string) (*Environments, error) {
 	for _, cfg := range *configs {
 		env := Environment{
 			Name:                cfg.Name,
+			ClientId:            cfg.ClientId,
 			ServiceAppId:        cfg.ServiceAppId,
 			ServiceURI:          strings.TrimRight(cfg.ServiceURI, "/"),
+			TenantId:            cfg.TenantId,
 			accessTokenProvider: NewProvider(&cfg),
 		}
 		env.inspectionEventResourceServiceClient = &InspectionEventResourceServiceClient{
