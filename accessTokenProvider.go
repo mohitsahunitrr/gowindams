@@ -1,17 +1,6 @@
 package gowindams
 
-import (
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
-	"log"
-	"net/http"
-	"net/url"
-	"sync"
-	"time"
-)
-
-const tokenURL = "https://login.microsoftonline.com/%s/oauth2/token"
+import "strings"
 
 type AccessTokenResponse struct {
 	AccessToken string `json:"access_token"`
@@ -31,81 +20,46 @@ type AccessTokenErrorResponse struct {
 	CorrelationId string `json:"correlation_id"`
 }
 
-type accessTokenProvider struct {
-	clientId string
-	tenantId string
-	clientSecret string
-	mutex sync.Mutex
-	tokenCache map[string] *AccessTokenResponse
+type jwt struct {
+	Alg string `json:"alg"`
+	Kty string `json:"kty"`
+	Use string `json:"use"`
+	Kid string `json:"kid"`
+	X5t string `json:"x5t"`
+	N string `json:"n"`
+	E string `json:"e"`
+	X5c []string `json:"x5c"`
 }
 
-func (provider accessTokenProvider) obtainAccessToken(resource string) (string, error) {
-	provider.mutex.Lock()
-	defer provider.mutex.Unlock()
+type jwts struct {
+	Keys []jwt `json:"Keys"`
+}
 
-	// If there is a valid cert in the cache, use it.
-	resp, exists := provider.tokenCache[resource]
-	if exists {
-		// See if the cert has expired
-		now := time.Now().Unix()
-		if now >= resp.ExpiresOn {
-			exists = false
+type accessTokenProvider interface {
+	obtainAccessToken(string) (string, error)
+	obtainSigningKeys() (map[string][]byte, error)
+}
+
+func NewProvider(envCfg *EnvironmentConfig) accessTokenProvider {
+	s := strings.ToLower(envCfg.AccessTokenProvider)
+
+	if strings.Contains(s, "auth0") {
+		provider := auth0AccessTokenProvider{
+			clientId:     envCfg.ClientId,
+			tenantId:     envCfg.TenantId,
+			clientSecret: envCfg.ClientSecret,
+			tokenCache:   make(map[string]*AccessTokenResponse),
 		}
+		return &provider
 	}
-	if exists {
-		return resp.AccessToken, nil
-	}
-
-	// Query for a new token
-	resp, err := provider.queryAccessToken(resource)
-	if err != nil {
-		return "", err
-	} else {
-		// Cache the token
-		provider.tokenCache[resource] = resp
-		return resp.AccessToken, nil
-	}
-}
-
-func (provider accessTokenProvider) queryAccessToken(resource string) (*AccessTokenResponse, error) {
-	params := make(url.Values)
-	params["grant_type"] = []string{"client_credentials"}
-	params["client_id"] = []string{provider.clientId}
-	params["client_secret"] = []string{provider.clientSecret}
-	params["resource"] = []string{resource}
-
-	resp, err := http.PostForm(
-		fmt.Sprintf(tokenURL, provider.tenantId),
-		params)
-	if err != nil {
-		return nil, err
-	} else {
-		atresp := new(AccessTokenResponse)
-		data, _ := ioutil.ReadAll(resp.Body)
-		if resp.StatusCode != 200 {
-			eresp := new(AccessTokenErrorResponse)
-			json.Unmarshal(data, &eresp)
-			log.Printf("GOWINDAMS: Error from token request:\t%s", eresp.ErrorDescription)
-			return nil, fmt.Errorf("%s", eresp.Error)
-		} else {
-			err = json.Unmarshal(data, &atresp)
-			if err != nil {
-				log.Printf("GOWINDAMS: Error obtaining access token for resource %s: %s\n", resource, err)
-				return nil, err
-			} else {
-//				log.Printf("GOWINDAMS: Successfully obtained access token for resource %s: %+v\n", resource, atresp)
-				return atresp, nil
-			}
+	if strings.Contains(s, "aad") {
+		provider := aadAccessTokenProvider{
+			clientId:     envCfg.ClientId,
+			tenantId:     envCfg.TenantId,
+			clientSecret: envCfg.ClientSecret,
+			tokenCache:   make(map[string]*AccessTokenResponse),
 		}
+		return &provider
 	}
-}
-
-func NewProvider(envCfg *EnvironmentConfig) *accessTokenProvider {
-	provider := accessTokenProvider {
-		clientId: envCfg.ClientId,
-		tenantId: envCfg.TenantId,
-		clientSecret: envCfg.ClientSecret,
-		tokenCache: make(map[string] *AccessTokenResponse),
-	}
-	return &provider
+	return nil
 }

@@ -8,12 +8,13 @@ import (
 )
 
 type EnvironmentConfig struct {
-	Name string            `json:"name" yaml:"name"`
-	ServiceURI string      `json:"serviceURI" yaml:"serviceURI"`
-	ClientId string        `json:"clientId" yaml:"clientId"`
-	ClientSecret string    `json:"clientSecret" yaml:"clientSecret"`
-	TenantId string        `json:"tenantId" yaml:"tenantId"`
-	ServiceAppId string    `json:"serviceAppId" yaml:"serviceAppId"`
+	Name string                `json:"name"                yaml:"name"`
+	ServiceURI string          `json:"serviceURI"          yaml:"serviceURI"`
+	ClientId string            `json:"clientId"            yaml:"clientId"`
+	ClientSecret string        `json:"clientSecret"        yaml:"clientSecret"`
+	TenantId string            `json:"tenantId"            yaml:"tenantId"`
+	ServiceAppId string        `json:"serviceAppId"        yaml:"serviceAppId"`
+	AccessTokenProvider string `json:"accessTokenProvider" yaml:"accessTokenProvider"`
 }
 
 type EnvironmentConfigs []EnvironmentConfig
@@ -22,14 +23,20 @@ type Environment struct {
 	Name string
 	ServiceAppId string
 	ServiceURI string
-	accessTokenProvider *accessTokenProvider
+	accessTokenProvider accessTokenProvider
 	inspectionEventResourceServiceClient *InspectionEventResourceServiceClient
 	resourceServiceClient *ResourceServiceClient
 	processQueueServiceClient *ProcessQueueServiceClient
 }
 
 func (env Environment) obtainAccessToken() (string, error) {
-	return env.accessTokenProvider.obtainAccessToken(env.ServiceAppId)
+	token, err := env.accessTokenProvider.obtainAccessToken(env.ServiceAppId)
+	return token, err
+}
+
+func (env Environment) ObtainSigningKeys() (map[string][]byte, error) {
+	keys, err := env.accessTokenProvider.obtainSigningKeys()
+	return keys, err
 }
 
 func (env Environment) InspectionEventResourceServiceClient() *InspectionEventResourceServiceClient {
