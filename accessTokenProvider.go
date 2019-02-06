@@ -1,6 +1,12 @@
 package gowindams
 
-import "strings"
+import (
+	"crypto/rsa"
+	"github.com/lestrrat/go-jwx/jwk"
+	"strings"
+	"sync"
+	"time"
+)
 
 type AccessTokenResponse struct {
 	AccessToken string `json:"access_token"`
@@ -20,24 +26,11 @@ type AccessTokenErrorResponse struct {
 	CorrelationId string `json:"correlation_id"`
 }
 
-type jwt struct {
-	Alg string `json:"alg"`
-	Kty string `json:"kty"`
-	Use string `json:"use"`
-	Kid string `json:"kid"`
-	X5t string `json:"x5t"`
-	N string `json:"n"`
-	E string `json:"e"`
-	X5c []string `json:"x5c"`
-}
-
-type jwts struct {
-	Keys []jwt `json:"Keys"`
-}
-
 type accessTokenProvider interface {
-	obtainAccessToken(string) (string, error)
-	obtainSigningKeys() (map[string][]byte, error)
+	getMutex() *sync.Mutex
+	getTokenCache() *map[string] *AccessTokenResponse
+	getWellKnown() ([]byte, error)
+	queryAccessToken(resource string) (*AccessTokenResponse, error)
 }
 
 func NewProvider(envCfg *EnvironmentConfig) accessTokenProvider {
@@ -62,4 +55,51 @@ func NewProvider(envCfg *EnvironmentConfig) accessTokenProvider {
 		return &provider
 	}
 	return nil
+}
+
+
+func obtainAccessToken(provider accessTokenProvider, resource string) (string, error) {
+	provider.getMutex().Lock()
+	defer provider.getMutex().Unlock()
+
+	tokenCache := *provider.getTokenCache()
+	// If there is a valid cert in the cache, use it.
+	resp, exists := tokenCache[resource]
+	if exists {
+		// See if the cert has expired
+		now := time.Now().Unix()
+		if now >= resp.ExpiresOn {
+			exists = false
+		}
+	}
+	if exists {
+		return resp.AccessToken, nil
+	}
+
+	// Query for a new token
+	resp, err := provider.queryAccessToken(resource)
+	if err != nil {
+		return "", err
+	} else {
+		// Cache the token
+		tokenCache[resource] = resp
+		return resp.AccessToken, nil
+	}
+}
+
+
+func obtainSigningKeys(provider accessTokenProvider) (map[string]interface{}, error) {
+	body, err := provider.getWellKnown()
+	if err != nil {
+		return nil, err
+	}
+	keys := make(map[string]interface{})
+	set, _ := jwk.Parse(body)
+	for _, key := range set.Keys {
+		publicKey, _ := key.Materialize()
+		if publicKey, ok := publicKey.(*rsa.PublicKey); ok {
+			keys[key.KeyID()] = publicKey
+		} // else, not an rsa key
+	}
+	return keys, nil
 }

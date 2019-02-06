@@ -51,7 +51,17 @@ func (provider auth0AccessTokenProvider) obtainAccessToken(resource string) (str
 	}
 }
 
+func (provider auth0AccessTokenProvider) getMutex() *sync.Mutex {
+	return &provider.mutex
+}
+
+func (provider auth0AccessTokenProvider) getTokenCache() *map[string] *AccessTokenResponse {
+	return &provider.tokenCache
+}
+
 func (provider auth0AccessTokenProvider) queryAccessToken(resource string) (*AccessTokenResponse, error) {
+	// The below code is the same for aadAccessTokenProvider and auth0TokenProvider except for URL building, but may be
+	// different for others, so keeping it duplicated for now.
 	params := make(url.Values)
 	params["grant_type"] = []string{"client_credentials"}
 	params["client_id"] = []string{provider.clientId}
@@ -84,7 +94,7 @@ func (provider auth0AccessTokenProvider) queryAccessToken(resource string) (*Acc
 	}
 }
 
-func (provider auth0AccessTokenProvider) obtainSigningKeys() (map[string][]byte, error) {
+func (provider auth0AccessTokenProvider) getWellKnown() ([]byte, error) {
 	resp, err := http.Get(fmt.Sprintf(auth0KeysURL, provider.tenantId))
 	if err != nil {
 		return nil, err
@@ -92,20 +102,11 @@ func (provider auth0AccessTokenProvider) obtainSigningKeys() (map[string][]byte,
 	if resp.StatusCode != 200 {
 		return nil, fmt.Errorf("Unable to obtain signing Keys, got response code %d", resp.StatusCode)
 	} else {
-		myjwts := new(jwts)
 		defer resp.Body.Close()
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
 			return nil, err
 		}
-		err = json.Unmarshal(body, myjwts)
-		if err != nil {
-			return nil, err
-		}
-		keys := make(map[string][]byte)
-		for _, jwt := range myjwts.Keys {
-			keys[jwt.Kid] = []byte(jwt.X5c[0])
-		}
-		return keys, nil
+		return body, nil
 	}
 }

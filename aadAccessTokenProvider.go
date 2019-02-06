@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"net/url"
 	"sync"
-	"time"
 )
 
 const aadTokenURL = "https://login.microsoftonline.com/%s/oauth2/token"
@@ -22,35 +21,17 @@ type aadAccessTokenProvider struct {
 	tokenCache map[string] *AccessTokenResponse
 }
 
-func (provider aadAccessTokenProvider) obtainAccessToken(resource string) (string, error) {
-	provider.mutex.Lock()
-	defer provider.mutex.Unlock()
+func (provider aadAccessTokenProvider) getMutex() *sync.Mutex {
+	return &provider.mutex
+}
 
-	// If there is a valid cert in the cache, use it.
-	resp, exists := provider.tokenCache[resource]
-	if exists {
-		// See if the cert has expired
-		now := time.Now().Unix()
-		if now >= resp.ExpiresOn {
-			exists = false
-		}
-	}
-	if exists {
-		return resp.AccessToken, nil
-	}
-
-	// Query for a new token
-	resp, err := provider.queryAccessToken(resource)
-	if err != nil {
-		return "", err
-	} else {
-		// Cache the token
-		provider.tokenCache[resource] = resp
-		return resp.AccessToken, nil
-	}
+func (provider aadAccessTokenProvider) getTokenCache() *map[string] *AccessTokenResponse {
+	return &provider.tokenCache
 }
 
 func (provider aadAccessTokenProvider) queryAccessToken(resource string) (*AccessTokenResponse, error) {
+	// The below code is the same for aadAccessTokenProvider and auth0TokenProvider except for URL building, but may be
+	// different for others, so keeping it duplicated for now.
 	params := make(url.Values)
 	params["grant_type"] = []string{"client_credentials"}
 	params["client_id"] = []string{provider.clientId}
@@ -83,7 +64,7 @@ func (provider aadAccessTokenProvider) queryAccessToken(resource string) (*Acces
 	}
 }
 
-func (provider aadAccessTokenProvider) obtainSigningKeys() (map[string][]byte, error) {
+func (provider aadAccessTokenProvider) getWellKnown() ([]byte, error) {
 	resp, err := http.Get(addKeysURL)
 	if err != nil {
 		return nil, err
@@ -91,20 +72,11 @@ func (provider aadAccessTokenProvider) obtainSigningKeys() (map[string][]byte, e
 	if resp.StatusCode != 200 {
 		return nil, fmt.Errorf("Unable to obtain signing Keys, got response code %d", resp.StatusCode)
 	} else {
-		myjwts := new(jwts)
 		defer resp.Body.Close()
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
 			return nil, err
 		}
-		err = json.Unmarshal(body, myjwts)
-		if err != nil {
-			return nil, err
-		}
-		keys := make(map[string][]byte)
-		for _, jwt := range myjwts.Keys {
-			keys[jwt.Kid] = []byte(jwt.X5c[0])
-		}
-		return keys, nil
+		return body, nil
 	}
 }

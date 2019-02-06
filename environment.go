@@ -30,16 +30,16 @@ type Environment struct {
 }
 
 func (env Environment) obtainAccessToken() (string, error) {
-	token, err := env.accessTokenProvider.obtainAccessToken(env.ServiceAppId)
+	token, err := obtainAccessToken(env.accessTokenProvider, env.ServiceAppId)
 	return token, err
 }
 
-func (env Environment) ObtainSigningKeys() (map[string][]byte, error) {
+func (env Environment) ObtainSigningKeys() (map[string]interface{}, error) {
 	if env.accessTokenProvider == nil {
-		keys := make(map[string][]byte)
+		keys := make(map[string]interface{})
 		return keys, nil
 	} else {
-		keys, err := env.accessTokenProvider.obtainSigningKeys()
+		keys, err := obtainSigningKeys(env.accessTokenProvider)
 		return keys, err
 	}
 }
