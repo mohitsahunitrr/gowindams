@@ -1,7 +1,7 @@
 package gowindams
 
 import (
-	"errors"
+	"fmt"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
@@ -31,13 +31,42 @@ type Environment struct {
 	resourceServiceClient *ResourceServiceClient
 	processQueueServiceClient *ProcessQueueServiceClient
 }
+type AuthenticationProviderType int
 
-var NoTokenProvider = errors.New("No access token provider available for the environment")
+const (
+	AP_Auth0 = iota
+	AP_AzureActiveDirectory = iota
+	AP_Other = iota
+)
+
+
+func (env Environment) GetAuthenticationProviderType() AuthenticationProviderType {
+	if env.accessTokenProvider == nil {
+		return AP_Other
+	}
+	_, ok := env.accessTokenProvider.(aadAccessTokenProvider)
+	if ok {
+		return AP_AzureActiveDirectory
+	}
+	_, ok = env.accessTokenProvider.(auth0AccessTokenProvider)
+	if ok {
+		return AP_Auth0
+	}
+	return AP_Other
+}
+
+func (env Environment) IsServerToServer() bool {
+	return env.accessTokenProvider != nil && env.accessTokenProvider.isServerToServer()
+}
+
+func (env Environment) IsUserAuthenticated() bool {
+	return env.accessTokenProvider != nil && env.accessTokenProvider.isUserAuthenticated()
+}
 
 func (env Environment) ObtainAccessToken() (string, error) {
 	if env.accessTokenProvider == nil {
 		// No provider
-		return "", NoTokenProvider
+		return "", fmt.Errorf("No access token provider available for the environment %s", env.Name)
 	} else {
 		token, err := obtainAccessToken(env.accessTokenProvider, env.ServiceAppId)
 		return token, err

@@ -29,6 +29,19 @@ type AccessTokenErrorResponse struct {
 type accessTokenProvider interface {
 	getWellKnown() ([]byte, error)
 	queryAccessToken(resource string) (*AccessTokenResponse, error)
+	isServerToServer() bool
+	isUserAuthenticated() bool
+}
+
+type tokenCacheStruct struct {
+	cache map[string]*AccessTokenResponse
+	sync.Mutex
+}
+
+var tokenCache tokenCacheStruct
+
+func init() {
+	tokenCache.cache = make(map[string]*AccessTokenResponse)
 }
 
 func NewProvider(envCfg *EnvironmentConfig) accessTokenProvider {
@@ -53,20 +66,9 @@ func NewProvider(envCfg *EnvironmentConfig) accessTokenProvider {
 	return nil
 }
 
-type tokenCacheStruct struct {
-	cache map[string]*AccessTokenResponse
-	sync.Mutex
-}
-
-var tokenCache tokenCacheStruct
-
 func obtainAccessToken(provider accessTokenProvider, resource string) (string, error) {
 	tokenCache.Mutex.Lock()
 	defer tokenCache.Mutex.Unlock()
-
-	if tokenCache.cache == nil {
-		tokenCache.cache = make(map[string]*AccessTokenResponse)
-	}
 
 	// If there is a valid cert in the cache, use it.
 	resp, exists := tokenCache.cache[resource]

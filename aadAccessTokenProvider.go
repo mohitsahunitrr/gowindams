@@ -69,3 +69,13 @@ func (provider aadAccessTokenProvider) getWellKnown() ([]byte, error) {
 		return body, nil
 	}
 }
+
+/* If there is a client secret, we assume it's server to server.  Otherwise, it must be user authenticated. */
+
+func (provider aadAccessTokenProvider) isServerToServer() bool {
+	return provider.clientSecret != ""
+}
+
+func (provider aadAccessTokenProvider) isUserAuthenticated() bool {
+	return ! provider.isServerToServer()
+}
