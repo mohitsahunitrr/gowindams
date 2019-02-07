@@ -80,3 +80,7 @@ func (provider auth0AccessTokenProvider) isServerToServer() bool {
 func (provider auth0AccessTokenProvider) isUserAuthenticated() bool {
 	return ! provider.isServerToServer()
 }
+
+func (provider auth0AccessTokenProvider) getAuthenticationProviderType() AuthenticationProviderType {
+	return AP_Auth0
+}
