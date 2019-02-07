@@ -79,3 +79,7 @@ func (provider aadAccessTokenProvider) isServerToServer() bool {
 func (provider aadAccessTokenProvider) isUserAuthenticated() bool {
 	return ! provider.isServerToServer()
 }
+
+func (provider aadAccessTokenProvider) getAuthenticationProviderType() AuthenticationProviderType {
+	return AP_AzureActiveDirectory
+}

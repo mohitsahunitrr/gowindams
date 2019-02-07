@@ -31,28 +31,12 @@ type Environment struct {
 	resourceServiceClient *ResourceServiceClient
 	processQueueServiceClient *ProcessQueueServiceClient
 }
-type AuthenticationProviderType int
-
-const (
-	AP_Auth0 = iota
-	AP_AzureActiveDirectory = iota
-	AP_Other = iota
-)
-
 
 func (env Environment) GetAuthenticationProviderType() AuthenticationProviderType {
 	if env.accessTokenProvider == nil {
 		return AP_Other
 	}
-	_, ok := env.accessTokenProvider.(aadAccessTokenProvider)
-	if ok {
-		return AP_AzureActiveDirectory
-	}
-	_, ok = env.accessTokenProvider.(auth0AccessTokenProvider)
-	if ok {
-		return AP_Auth0
-	}
-	return AP_Other
+	return env.accessTokenProvider.getAuthenticationProviderType()
 }
 
 func (env Environment) IsServerToServer() bool {

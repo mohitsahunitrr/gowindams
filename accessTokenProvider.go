@@ -26,7 +26,16 @@ type AccessTokenErrorResponse struct {
 	CorrelationId string `json:"correlation_id"`
 }
 
+type AuthenticationProviderType int
+
+const (
+	AP_Auth0 = iota
+	AP_AzureActiveDirectory = iota
+	AP_Other = iota
+)
+
 type accessTokenProvider interface {
+	getAuthenticationProviderType() AuthenticationProviderType
 	getWellKnown() ([]byte, error)
 	queryAccessToken(resource string) (*AccessTokenResponse, error)
 	isServerToServer() bool
