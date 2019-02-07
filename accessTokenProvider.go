@@ -27,8 +27,6 @@ type AccessTokenErrorResponse struct {
 }
 
 type accessTokenProvider interface {
-	getMutex() *sync.Mutex
-	getTokenCache() *map[string] *AccessTokenResponse
 	getWellKnown() ([]byte, error)
 	queryAccessToken(resource string) (*AccessTokenResponse, error)
 }
@@ -41,7 +39,6 @@ func NewProvider(envCfg *EnvironmentConfig) accessTokenProvider {
 			clientId:     envCfg.ClientId,
 			tenantId:     envCfg.TenantId,
 			clientSecret: envCfg.ClientSecret,
-			tokenCache:   make(map[string]*AccessTokenResponse),
 		}
 		return &provider
 	}
@@ -50,21 +47,29 @@ func NewProvider(envCfg *EnvironmentConfig) accessTokenProvider {
 			clientId:     envCfg.ClientId,
 			tenantId:     envCfg.TenantId,
 			clientSecret: envCfg.ClientSecret,
-			tokenCache:   make(map[string]*AccessTokenResponse),
 		}
 		return &provider
 	}
 	return nil
 }
 
+type tokenCacheStruct struct {
+	cache map[string]*AccessTokenResponse
+	sync.Mutex
+}
+
+var tokenCache tokenCacheStruct
 
 func obtainAccessToken(provider accessTokenProvider, resource string) (string, error) {
-	provider.getMutex().Lock()
-	defer provider.getMutex().Unlock()
+	tokenCache.Mutex.Lock()
+	defer tokenCache.Mutex.Unlock()
 
-	tokenCache := *provider.getTokenCache()
+	if tokenCache.cache == nil {
+		tokenCache.cache = make(map[string]*AccessTokenResponse)
+	}
+
 	// If there is a valid cert in the cache, use it.
-	resp, exists := tokenCache[resource]
+	resp, exists := tokenCache.cache[resource]
 	if exists {
 		// See if the cert has expired
 		now := time.Now().Unix()
@@ -82,7 +87,7 @@ func obtainAccessToken(provider accessTokenProvider, resource string) (string, e
 		return "", err
 	} else {
 		// Cache the token
-		tokenCache[resource] = resp
+		tokenCache.cache[resource] = resp
 		return resp.AccessToken, nil
 	}
 }

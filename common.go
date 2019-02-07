@@ -62,7 +62,7 @@ func executeRestCall(env *Environment, action string, url string, data []byte, r
 		log.Printf("GOWINDAMS: Error building http request for %s against %s: %s\n", action, url, err)
 		return err
 	}
-	token, err := env.obtainAccessToken()
+	token, err := env.ObtainAccessToken()
 	if err != nil {
 		return err
 	}

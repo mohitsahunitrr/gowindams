@@ -7,7 +7,6 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"sync"
 )
 
 const aadTokenURL = "https://login.microsoftonline.com/%s/oauth2/token"
@@ -17,16 +16,6 @@ type aadAccessTokenProvider struct {
 	clientId string
 	tenantId string
 	clientSecret string
-	mutex sync.Mutex
-	tokenCache map[string] *AccessTokenResponse
-}
-
-func (provider aadAccessTokenProvider) getMutex() *sync.Mutex {
-	return &provider.mutex
-}
-
-func (provider aadAccessTokenProvider) getTokenCache() *map[string] *AccessTokenResponse {
-	return &provider.tokenCache
 }
 
 func (provider aadAccessTokenProvider) queryAccessToken(resource string) (*AccessTokenResponse, error) {

@@ -7,8 +7,6 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"sync"
-	"time"
 )
 
 // In both of the below URLs, %s should be tenant ID such as precisionhawk.auth0.com
@@ -19,44 +17,6 @@ type auth0AccessTokenProvider struct {
 	clientId string
 	tenantId string
 	clientSecret string
-	mutex sync.Mutex
-	tokenCache map[string] *AccessTokenResponse
-}
-
-func (provider auth0AccessTokenProvider) obtainAccessToken(resource string) (string, error) {
-	provider.mutex.Lock()
-	defer provider.mutex.Unlock()
-
-	// If there is a valid cert in the cache, use it.
-	resp, exists := provider.tokenCache[resource]
-	if exists {
-		// See if the cert has expired
-		now := time.Now().Unix()
-		if now >= resp.ExpiresOn {
-			exists = false
-		}
-	}
-	if exists {
-		return resp.AccessToken, nil
-	}
-
-	// Query for a new token
-	resp, err := provider.queryAccessToken(resource)
-	if err != nil {
-		return "", err
-	} else {
-		// Cache the token
-		provider.tokenCache[resource] = resp
-		return resp.AccessToken, nil
-	}
-}
-
-func (provider auth0AccessTokenProvider) getMutex() *sync.Mutex {
-	return &provider.mutex
-}
-
-func (provider auth0AccessTokenProvider) getTokenCache() *map[string] *AccessTokenResponse {
-	return &provider.tokenCache
 }
 
 func (provider auth0AccessTokenProvider) queryAccessToken(resource string) (*AccessTokenResponse, error) {

@@ -1,6 +1,7 @@
 package gowindams
 
 import (
+	"errors"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
@@ -31,9 +32,16 @@ type Environment struct {
 	processQueueServiceClient *ProcessQueueServiceClient
 }
 
-func (env Environment) obtainAccessToken() (string, error) {
-	token, err := obtainAccessToken(env.accessTokenProvider, env.ServiceAppId)
-	return token, err
+var NoTokenProvider = errors.New("No access token provider available for the environment")
+
+func (env Environment) ObtainAccessToken() (string, error) {
+	if env.accessTokenProvider == nil {
+		// No provider
+		return "", NoTokenProvider
+	} else {
+		token, err := obtainAccessToken(env.accessTokenProvider, env.ServiceAppId)
+		return token, err
+	}
 }
 
 func (env Environment) ObtainSigningKeys() (map[string]interface{}, error) {
