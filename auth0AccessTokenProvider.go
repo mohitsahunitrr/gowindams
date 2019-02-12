@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"net/url"
+	"strings"
 )
 
 // In both of the below URLs, %s should be tenant ID such as precisionhawk.auth0.com
@@ -20,20 +20,20 @@ type auth0AccessTokenProvider struct {
 }
 
 func (provider auth0AccessTokenProvider) queryAccessToken(resource string) (*AccessTokenResponse, error) {
-	// The below code is the same for aadAccessTokenProvider and auth0TokenProvider except for URL building, but may be
-	// different for others, so keeping it duplicated for now.
-	params := make(url.Values)
-	params["grant_type"] = []string{"client_credentials"}
-	params["client_id"] = []string{provider.clientId}
-	params["client_secret"] = []string{provider.clientSecret}
-	params["resource"] = []string{resource}
 
-	resp, err := http.PostForm(
-		fmt.Sprintf(auth0TokenURL, provider.tenantId),
-		params)
+	url := fmt.Sprintf(auth0TokenURL, provider.tenantId)
+	payload := strings.NewReader(
+		fmt.Sprintf(
+			"{\"client_id\":\"%s\",\"client_secret\":\"%s\",\"audience\":\"%s\",\"grant_type\":\"client_credentials\"}",
+			provider.clientId, provider.clientSecret, resource))
+
+	req, _ := http.NewRequest(http.MethodPost, url, payload)
+	req.Header.Add("content-type", "application/json")
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
 	} else {
+		defer resp.Body.Close()
 		atresp := new(AccessTokenResponse)
 		data, _ := ioutil.ReadAll(resp.Body)
 		if resp.StatusCode != 200 {
@@ -59,10 +59,10 @@ func (provider auth0AccessTokenProvider) getWellKnown() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer resp.Body.Close()
 	if resp.StatusCode != 200 {
 		return nil, fmt.Errorf("Unable to obtain signing Keys, got response code %d", resp.StatusCode)
 	} else {
-		defer resp.Body.Close()
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
 			return nil, err
