@@ -10,7 +10,7 @@ import (
 )
 
 // In both of the below URLs, %s should be tenant ID such as precisionhawk.auth0.com
-const auth0TokenURL = "https://%s/oauth2/token"
+const auth0TokenURL = "https://%s/oauth/token"
 const auth0KeysURL = "https://%s/.well-known/jwks.json"
 
 type auth0AccessTokenProvider struct {
