@@ -17,6 +17,9 @@ const DATE_FORMAT = "yyyyMMdd"
 const DATE_TIME_FORMAT = "20060102T150405.000-0700" //"yyyyMMddTHHmmss.SSSZ"
 const TIME_FORMAT = "'T'HHmmss.SSSZ"
 
+const INSPECTION_POSITION_BLADE_TIP_DOWN = "bladeTipDown"
+const INSPECTION_POSITION_BLADE_TIP_UP = "bladeTipUp"
+
 type WindAMSTime time.Time
 
 func (t WindAMSTime) Format(layout string) string {

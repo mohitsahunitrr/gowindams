@@ -10,9 +10,11 @@ type ProcessQueueEntry struct {
 	Id *int64           `json:"id"`
 	ObjectId *string    `json:"objectId"`
 	ProcessType *string `json:"processType"`
+	Data *string        `json:"data"`
 }
 
 const ProcessTypeCIRScale = "CIR_Scale"
+const ProcessTypeDataImport = "Data_Import"
 const ProcessTypeZoomifyImage = "Zoomify_Img"
 
 type ProcessQueueServiceClient struct {
