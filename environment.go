@@ -38,6 +38,22 @@ type Environment struct {
 	workOrderServiceClient *WorkOrderServiceClient
 }
 
+func (env Environment) AssetInspectionServiceClient() *AssetInspectionServiceClient {
+	return env.assetInspectionServiceClient
+}
+
+func (env Environment) AssetServiceServiceClient() *AssetServiceClient {
+	return env.assetServiceClient
+}
+
+func (env Environment) ComponentInspectionServiceClient() *ComponentInspectionServiceClient {
+	return env.componentInspectionServiceClient
+}
+
+func (env Environment) ComponentServiceClient() *ComponentServiceClient {
+	return env.componentServiceClient
+}
+
 func (env Environment) GetAuthenticationProviderType() AuthenticationProviderType {
 	if env.accessTokenProvider == nil {
 		return AP_Other
@@ -76,12 +92,21 @@ func (env Environment) ObtainSigningKeys() (map[string]interface{}, error) {
 func (env Environment) InspectionEventResourceServiceClient() *InspectionEventResourceServiceClient {
 	return env.inspectionEventResourceServiceClient
 }
+
+func (env Environment) ProcessQueueServiceClient() *ProcessQueueServiceClient {
+	return env.processQueueServiceClient
+}
+
 func (env Environment) ResourceServiceClient() *ResourceServiceClient {
 	return env.resourceServiceClient
 }
 
-func (env Environment) ProcessQueueServiceClient() *ProcessQueueServiceClient {
-	return env.processQueueServiceClient
+func (env Environment) SiteServiceClient() *SiteServiceClient {
+	return env.siteServiceClient
+}
+
+func (env Environment) WorkOrderServiceClient() *WorkOrderServiceClient {
+	return env.workOrderServiceClient
 }
 
 type Environments []Environment
