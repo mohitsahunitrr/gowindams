@@ -27,9 +27,15 @@ type Environment struct {
 	ServiceURI string
 	TenantId string
 	accessTokenProvider accessTokenProvider
+	assetServiceClient *AssetServiceClient
+	assetInspectionServiceClient *AssetInspectionServiceClient
+	componentServiceClient *ComponentServiceClient
+	componentInspectionServiceClient *ComponentInspectionServiceClient
 	inspectionEventResourceServiceClient *InspectionEventResourceServiceClient
-	resourceServiceClient *ResourceServiceClient
 	processQueueServiceClient *ProcessQueueServiceClient
+	resourceServiceClient *ResourceServiceClient
+	siteServiceClient *SiteServiceClient
+	workOrderServiceClient *WorkOrderServiceClient
 }
 
 func (env Environment) GetAuthenticationProviderType() AuthenticationProviderType {
@@ -119,6 +125,18 @@ func LoadEnvironments(configFilePath string) (*Environments, error) {
 			TenantId:            cfg.TenantId,
 			accessTokenProvider: NewProvider(&cfg),
 		}
+		env.assetInspectionServiceClient = &AssetInspectionServiceClient{
+			env: &env,
+		}
+		env.assetServiceClient = &AssetServiceClient{
+			env: &env,
+		}
+		env.componentInspectionServiceClient = &ComponentInspectionServiceClient{
+			env: &env,
+		}
+		env.componentServiceClient = &ComponentServiceClient{
+			env: &env,
+		}
 		env.inspectionEventResourceServiceClient = &InspectionEventResourceServiceClient{
 			env: &env,
 		}
@@ -126,6 +144,12 @@ func LoadEnvironments(configFilePath string) (*Environments, error) {
 			env: &env,
 		}
 		env.resourceServiceClient = &ResourceServiceClient{
+			env: &env,
+		}
+		env.siteServiceClient = &SiteServiceClient{
+			env: &env,
+		}
+		env.workOrderServiceClient = &WorkOrderServiceClient{
 			env: &env,
 		}
 		environments[i] = env
