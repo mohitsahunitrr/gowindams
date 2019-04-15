@@ -42,7 +42,7 @@ func (env Environment) AssetInspectionServiceClient() *AssetInspectionServiceCli
 	return env.assetInspectionServiceClient
 }
 
-func (env Environment) AssetServiceServiceClient() *AssetServiceClient {
+func (env Environment) AssetServiceClient() *AssetServiceClient {
 	return env.assetServiceClient
 }
 
