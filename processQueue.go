@@ -9,7 +9,7 @@ import (
 type ProcessQueueEntry struct {
 	Id *int64             `json:"id"`
 	ObjectId *string      `json:"objectId"`
-	ParentEntryId *string `json:"parentEntryId"`
+	ParentEntryId *int64  `json:"parentEntryId"`
 	ProcessType *string   `json:"processType"`
 	Data *string          `json:"data"`
 }
