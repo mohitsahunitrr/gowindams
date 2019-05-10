@@ -7,10 +7,11 @@ import (
 )
 
 type ProcessQueueEntry struct {
-	Id *int64           `json:"id"`
-	ObjectId *string    `json:"objectId"`
-	ProcessType *string `json:"processType"`
-	Data *string        `json:"data"`
+	Id *int64             `json:"id"`
+	ObjectId *string      `json:"objectId"`
+	ParentEntryId *string `json:"parentEntryId"`
+	ProcessType *string   `json:"processType"`
+	Data *string          `json:"data"`
 }
 
 const ProcessTypeCIRScale = "CIR_Scale"
